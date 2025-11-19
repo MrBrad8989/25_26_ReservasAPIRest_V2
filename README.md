@@ -1,16 +1,31 @@
 # ReservasAPIRest
 
-Proyecto REST API para gestionar reservas de aulas, creado con Spring Boot y Maven.
+Proyecto REST API para gestionar reservas de aulas, creado con Spring Boot y Maven, con interfaz web completa incluida.
+
+**Inicio rápido**
+
+```bash
+# Clonar el repositorio
+git clone <url-del-repo>
+cd 25_26_ReservasAPIRest_V2
+
+# Ejecutar la aplicación
+./mvnw spring-boot:run
+
+# Abrir en el navegador
+# http://localhost:8080/
+```
 
 **Descripción breve**
-- **Propósito:** API backend para crear, listar y gestionar aulas, horarios y reservas, con autenticación JWT.
-- **Stack:** Java 17, Spring Boot (Web, Data JPA, Security), Maven, H2/Postgres/MySQL, JJWT para tokens JWT.
+- **Propósito:** API backend para crear, listar y gestionar aulas, horarios y reservas, con autenticación JWT e interfaz web incluida.
+- **Stack:** Java 17, Spring Boot (Web, Data JPA, Security), Maven, H2/Postgres/MySQL, JJWT para tokens JWT, Frontend vanilla JavaScript.
 
 **Características**
 - **Autenticación:** Inicio de sesión y registro, protección de endpoints con JWT.
 - **Gestión de recursos:** CRUD para `Aula`, `Horario`, `Reserva` y `Usuario`.
 - **Persistencia flexible:** Soporta H2 (desarrollo), PostgreSQL y MySQL.
 - **Validaciones y manejo de errores:** Spring Validation y controlador global de excepciones.
+- **Interfaz web:** Frontend completo en vanilla JavaScript para gestionar todos los recursos sin necesidad de herramientas externas.
 
 **Tecnologías**
 - **Lenguaje:** Java 17 (`<java.version>17</java.version>` en `pom.xml`).
@@ -104,25 +119,76 @@ Si quieres, puedo:
 ---
 Archivo generado automáticamente: documentación base. Pídeme que lo personalice más si quieres.
 
-**Frontend incluido (estático)**
+**Frontend incluido (interfaz web completa)**
 
-- He añadido un frontend estático mínimo en `src/main/resources/static`:
-	- `index.html` — interfaz simple de autenticación y botones de acción.
-	- `app.js` — lógica JS para login y consulta a `GET /api/aulas` usando JWT.
-	- `styles.css` — estilos básicos.
+El proyecto ahora incluye un frontend web completo desarrollado en vanilla JavaScript, ubicado en `src/main/resources/static`. Esta interfaz permite gestionar todos los recursos de la API de forma visual sin necesidad de usar herramientas como Postman o curl.
 
-- Cómo usarlo:
+**Archivos del frontend:**
+- `index.html` — Interfaz HTML5 con formularios y navegación entre secciones
+- `app.js` — Lógica JavaScript para autenticación JWT y operaciones CRUD
+- `styles.css` — Estilos modernos con diseño responsivo y gradientes
 
-	1. Arranca la aplicación Spring Boot:
+**Funcionalidades disponibles:**
 
-	```bash
-	./mvnw spring-boot:run
-	```
+1. **Autenticación**
+   - Login con usuario y contraseña
+   - Almacenamiento seguro del token JWT en `localStorage`
+   - Modo demo para pruebas rápidas
+   - Cierre de sesión
 
-	2. Abre `http://localhost:8080/` en el navegador.
-	3. Inicia sesión con un usuario válido (`/api/auth/login`). Si la respuesta contiene el token, el frontend lo guardará en `localStorage`.
-	4. Haz clic en "Listar aulas" para consultar `GET /api/aulas` con el token en la cabecera `Authorization: Bearer <token>`.
+2. **Gestión de Aulas**
+   - Listar todas las aulas disponibles
+   - Crear nuevas aulas con capacidad y equipamiento
+   - Editar aulas existentes
+   - Eliminar aulas
+   - Campos: nombre, capacidad, ordenadores (sí/no), número de ordenadores
 
-- Notas:
-	- Este frontend es una base ligera para pruebas y demostraciones. Si prefieres un SPA con React/Vue/Angular, puedo generar el scaffold y conectar la build con `frontend-maven-plugin`.
+3. **Gestión de Horarios**
+   - Listar todos los horarios
+   - Crear nuevos horarios con día y sesión
+   - Eliminar horarios
+   - Campos: día de la semana, sesión diaria, hora inicio, hora fin
+
+4. **Gestión de Reservas**
+   - Listar todas las reservas
+   - Crear nuevas reservas seleccionando aula y horario
+   - Eliminar reservas
+   - Campos: fecha, motivo, número de asistentes, aula, horario
+
+5. **Gestión de Usuarios**
+   - Listar usuarios registrados
+   - Crear nuevos usuarios (registro)
+   - Eliminar usuarios
+   - Asignar roles (PROFESOR, ADMIN)
+
+**Cómo usar el frontend:**
+
+1. Arranca la aplicación Spring Boot:
+
+   ```bash
+   ./mvnw spring-boot:run
+   ```
+
+2. Abre tu navegador en `http://localhost:8080/`
+
+3. **Primera vez:** Inicia sesión con las credenciales por defecto (definidas en `DataLoader.java`) o usa el botón "Modo demo" para pruebas rápidas.
+
+4. **Navegación:** Usa los botones en la barra de navegación para cambiar entre las diferentes secciones (Aulas, Horarios, Reservas, Usuarios).
+
+5. **Operaciones:** Cada sección permite crear, listar y eliminar recursos. Los formularios se validan automáticamente.
+
+6. **Token JWT:** El token se gestiona automáticamente. Todas las peticiones a la API incluyen el header `Authorization: Bearer <token>`.
+
+**Características técnicas:**
+- Interfaz 100% vanilla JavaScript (sin frameworks)
+- Diseño responsivo que se adapta a móviles y tablets
+- Manejo de errores con mensajes informativos
+- Validación de formularios en cliente
+- Actualización automática de listas después de cada operación
+- Sistema de navegación por pestañas
+- Estilos modernos con variables CSS y gradientes
+
+**Notas:**
+- Este frontend está optimizado para desarrollo y pruebas. Para producción, considera añadir validaciones adicionales y manejo de errores más robusto.
+- Si prefieres migrar a un framework moderno (React, Vue, Angular), la estructura actual facilita la integración con `frontend-maven-plugin`.
 
