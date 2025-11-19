@@ -8,36 +8,176 @@
 </head>
 <body>
   <header>
-    <h1>Reservas API - Frontend</h1>
+    <div class="container">
+      <h1>Reservas</h1>
+      <p>Interfaz de prueba para la API — autentícate y gestiona aulas, horarios y reservas.</p>
+    </div>
   </header>
 
   <main>
-    <section id="auth">
+    <section id="auth" class="view" style="margin-bottom:16px">
       <h2>Autenticación</h2>
       <form id="loginForm">
-        <label>
-          Usuario
-          <input type="text" id="username" required />
+        <label>Usuario
+          <input type="text" id="username" required placeholder="Email o usuario">
         </label>
-        <label>
-          Contraseña
-          <input type="password" id="password" required />
+        <label>Contraseña
+          <input type="password" id="password" required placeholder="Contraseña">
         </label>
-        <button type="submit">Iniciar sesión</button>
+        <div style="display:flex;gap:8px;margin-top:6px">
+          <button type="submit" class="btn primary">Iniciar sesión</button>
+          <button type="button" id="btnGuest" class="btn ghost">Modo demo</button>
+        </div>
       </form>
       <div id="authInfo" class="info"></div>
     </section>
 
-    <section id="actions">
-      <h2>Operaciones</h2>
-      <div class="buttons">
-        <button id="btnGetAulas">Listar aulas</button>
-        <button id="btnClearToken">Cerrar sesión</button>
-      </div>
-      <div id="result" class="result"></div>
+    <nav class="main-nav" aria-label="Navegación principal">
+      <button data-view="aulas" class="nav-btn active">Aulas</button>
+      <button data-view="horarios" class="nav-btn">Horarios</button>
+      <button data-view="reservas" class="nav-btn">Reservas</button>
+      <button data-view="usuarios" class="nav-btn">Usuarios</button>
+      <button id="btnClearToken" class="nav-btn">Cerrar sesión</button>
+    </nav>
+
+    <section id="views">
+      <section id="aulasView" class="view">
+        <h2>Aulas</h2>
+        <div class="view-grid">
+          <div>
+            <h3>Crear / Editar aula</h3>
+            <form id="aulaForm">
+              <input type="hidden" id="aulaId" />
+              <label>Nombre
+                <input id="aulaNombre" required placeholder="Ej: Aula A101">
+              </label>
+              <label>Capacidad
+                <input id="aulaCapacidad" type="number" placeholder="Ej: 30">
+              </label>
+              <label>¿Tiene ordenadores?
+                <input id="aulaOrdenadores" type="checkbox">
+              </label>
+              <label>Nº ordenadores
+                <input id="aulaNumeroOrdenadores" type="number" placeholder="Ej: 20">
+              </label>
+              <div style="display:flex;gap:8px">
+                <button type="submit" class="btn primary">Guardar</button>
+                <button type="button" id="aulaReset" class="btn ghost">Limpiar</button>
+              </div>
+            </form>
+          </div>
+          <div>
+            <h3>Listado</h3>
+            <div id="aulasList" class="result"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="horariosView" class="view" style="display:none">
+        <h2>Horarios</h2>
+        <div class="view-grid">
+          <div>
+            <h3>Crear horario</h3>
+            <form id="horarioForm">
+              <input type="hidden" id="horarioId" />
+              <label>Día de la semana
+                <input id="horarioDia" placeholder="Ej: Lunes">
+              </label>
+              <label>Sesión diaria
+                <input id="horarioSesion" type="number" placeholder="Ej: 1">
+              </label>
+              <label>Hora inicio
+                <input id="horarioInicio" type="time">
+              </label>
+              <label>Hora fin
+                <input id="horarioFin" type="time">
+              </label>
+              <div style="display:flex;gap:8px">
+                <button type="submit" class="btn primary">Guardar</button>
+                <button type="button" id="horarioReset" class="btn ghost">Limpiar</button>
+              </div>
+            </form>
+          </div>
+          <div>
+            <h3>Listado</h3>
+            <div id="horariosList" class="result"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="reservasView" class="view" style="display:none">
+        <h2>Reservas</h2>
+        <div class="view-grid">
+          <div>
+            <h3>Crear reserva</h3>
+            <form id="reservaForm">
+              <label>Fecha
+                <input id="reservaFecha" type="date" required>
+              </label>
+              <label>Motivo
+                <input id="reservaMotivo">
+              </label>
+              <label>Nº asistentes
+                <input id="reservaAsistentes" type="number">
+              </label>
+              <label>Aula
+                <select id="reservaAula"></select>
+              </label>
+              <label>Horario
+                <select id="reservaHorario"></select>
+              </label>
+              <div style="display:flex;gap:8px">
+                <button type="submit" class="btn primary">Reservar</button>
+                <button type="button" id="reservaReset" class="btn ghost">Limpiar</button>
+              </div>
+            </form>
+          </div>
+          <div>
+            <h3>Listado</h3>
+            <div id="reservasList" class="result"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="usuariosView" class="view" style="display:none">
+        <h2>Usuarios</h2>
+        <div class="view-grid">
+          <div>
+            <h3>Crear usuario</h3>
+            <form id="usuarioForm">
+              <input type="hidden" id="usuarioId" />
+              <label>Nombre
+                <input id="usuarioNombre" placeholder="Ej: Juan Pérez">
+              </label>
+              <label>Email
+                <input id="usuarioEmail" type="email" placeholder="ejemplo@dominio.com">
+              </label>
+              <label>Contraseña
+                <input id="usuarioPassword" type="password" placeholder="Mínimo 6 caracteres">
+              </label>
+              <label>Role
+                <select id="usuarioRole">
+                  <option value="ROLE_PROFESOR">PROFESOR</option>
+                  <option value="ROLE_ADMIN">ADMIN</option>
+                </select>
+              </label>
+              <div style="display:flex;gap:8px">
+                <button type="submit" class="btn primary">Guardar</button>
+                <button type="button" id="usuarioReset" class="btn ghost">Limpiar</button>
+              </div>
+            </form>
+          </div>
+          <div>
+            <h3>Listado</h3>
+            <div id="usuariosList" class="result"></div>
+          </div>
+        </div>
+      </section>
     </section>
+
   </main>
 
   <script src="/app.js"></script>
+  <div class="footer">Proyecto de ejemplo — interfaz de pruebas para la API.</div>
 </body>
 </html>

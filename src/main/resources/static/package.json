@@ -1,0 +1,9 @@
+{
+  "name": "reservas-frontend-placeholder",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "build": "echo \"No frontend build script configured. Static files already present.\""
+  },
+  "dependencies": {}
+}
