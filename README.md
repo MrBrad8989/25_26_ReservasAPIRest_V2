@@ -126,3 +126,64 @@ Archivo generado automáticamente: documentación base. Pídeme que lo personali
 - Notas:
 	- Este frontend es una base ligera para pruebas y demostraciones. Si prefieres un SPA con React/Vue/Angular, puedo generar el scaffold y conectar la build con `frontend-maven-plugin`.
 
+**Frontend ampliado (novedades)**
+
+- He ampliado el frontend estático con vistas CRUD y mejoras visuales. Archivos añadidos/actualizados en `src/main/resources/static`:
+	- `index.html` — interfaz completa con navegación y formularios CRUD para Aulas, Horarios, Reservas y Usuarios.
+	- `app.js` — lógica JS para autenticación (login), gestión de token en `localStorage`, CRUD para recursos y navegación entre vistas. Incluye un botón "Modo demo" que almacena un token simulado (`DEMO`) para pruebas rápidas.
+	- `styles.css` — rediseño visual moderno y responsive.
+	- `package.json` — placeholder mínimo para que `frontend-maven-plugin` no falle (`npm install` / `npm run build`).
+
+**Cómo usar el frontend ampliado**
+
+1. Asegúrate de tener JDK 17 y Maven (usa el wrapper incluido). Si tu entorno no tiene Java 17, instala/configura OpenJDK 17 antes de compilar.
+
+2. Arranca la aplicación (desde la raíz del proyecto):
+
+```bash
+chmod +x mvnw
+./mvnw spring-boot:run
+```
+
+3. Abre en el navegador:
+
+```
+http://localhost:8080/
+```
+
+4. Prueba el frontend:
+	- Usa "Modo demo" para pruebas rápidas (almacena `DEMO` como token en `localStorage`). Algunas llamadas protegidas pueden requerir un token válido emitido por `/api/auth/login`.
+	- Navega entre las pestañas: `Aulas`, `Horarios`, `Reservas`, `Usuarios`.
+	- Crea/edita/borra recursos (nota: para crear/editar/borrar aulas y horarios puede ser necesario un usuario con rol `ADMIN`).
+
+**Notas y soluciones a problemas comunes**
+
+- Si al ejecutar `./mvnw spring-boot:run` ves errores relacionados con `npm` (frontend-maven-plugin), ya se añadió un `package.json` mínimo en `src/main/resources/static` para evitar fallos de `npm install`.
+- Si aparece el error `Fatal error compiling: error: release version 17 not supported`, asegúrate de ejecutar Maven con JDK 17. Comprueba con:
+
+```bash
+java -version
+javac -version
+mvn -v
+```
+
+- Si ves problemas de codificación al filtrar recursos (ej.: `MalformedInputException`), se añadió en `pom.xml`:
+
+```xml
+<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+```
+
+**Archivos clave añadidos**
+
+- `src/main/resources/static/index.html` — nueva UI con navegación y formularios.
+- `src/main/resources/static/app.js` — lógica de frontend (login, CRUD, navegación, demo mode).
+- `src/main/resources/static/styles.css` — estilos mejorados.
+- `src/main/resources/static/package.json` — placeholder para npm.
+
+---
+Si quieres, puedo ahora:
+- Añadir iconos y mensajes de éxito/fracaso en la UI.
+- Integrar una librería CSS (Tailwind/Bootstrap) o transformar esto en SPA con React + Vite y configurar `frontend-maven-plugin` para compilar la build.
+
+
