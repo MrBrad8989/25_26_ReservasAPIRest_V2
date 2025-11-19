@@ -104,3 +104,25 @@ Si quieres, puedo:
 ---
 Archivo generado automáticamente: documentación base. Pídeme que lo personalice más si quieres.
 
+**Frontend incluido (estático)**
+
+- He añadido un frontend estático mínimo en `src/main/resources/static`:
+	- `index.html` — interfaz simple de autenticación y botones de acción.
+	- `app.js` — lógica JS para login y consulta a `GET /api/aulas` usando JWT.
+	- `styles.css` — estilos básicos.
+
+- Cómo usarlo:
+
+	1. Arranca la aplicación Spring Boot:
+
+	```bash
+	./mvnw spring-boot:run
+	```
+
+	2. Abre `http://localhost:8080/` en el navegador.
+	3. Inicia sesión con un usuario válido (`/api/auth/login`). Si la respuesta contiene el token, el frontend lo guardará en `localStorage`.
+	4. Haz clic en "Listar aulas" para consultar `GET /api/aulas` con el token en la cabecera `Authorization: Bearer <token>`.
+
+- Notas:
+	- Este frontend es una base ligera para pruebas y demostraciones. Si prefieres un SPA con React/Vue/Angular, puedo generar el scaffold y conectar la build con `frontend-maven-plugin`.
+

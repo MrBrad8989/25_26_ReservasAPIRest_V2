@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Reservas - Frontend</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header>
+    <h1>Reservas API - Frontend</h1>
+  </header>
+
+  <main>
+    <section id="auth">
+      <h2>Autenticación</h2>
+      <form id="loginForm">
+        <label>
+          Usuario
+          <input type="text" id="username" required />
+        </label>
+        <label>
+          Contraseña
+          <input type="password" id="password" required />
+        </label>
+        <button type="submit">Iniciar sesión</button>
+      </form>
+      <div id="authInfo" class="info"></div>
+    </section>
+
+    <section id="actions">
+      <h2>Operaciones</h2>
+      <div class="buttons">
+        <button id="btnGetAulas">Listar aulas</button>
+        <button id="btnClearToken">Cerrar sesión</button>
+      </div>
+      <div id="result" class="result"></div>
+    </section>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>
