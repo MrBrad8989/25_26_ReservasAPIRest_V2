@@ -1,7 +1,6 @@
 package com.reservas.reservasapirest.controllers;
 
 import com.reservas.reservasapirest.entities.Aula;
-import com.reservas.reservasapirest.entities.Reserva;
 import com.reservas.reservasapirest.services.AulaService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +22,6 @@ public class AulaController {
         return service.getAulas();
     }
 
-
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Aula> getAulaById(@PathVariable Long id) {
@@ -31,18 +29,23 @@ public class AulaController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Aula> createAula(@RequestBody Aula aula) {
         Aula createdAula = service.createAula(aula);
         return ResponseEntity.status(201).body(createdAula);
     }
+
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Aula> actualizarAula(@PathVariable Long id, @RequestBody Aula aulaModificada) {
+        // CRÍTICO: Aseguramos el ID para que Hibernate no falle
+        aulaModificada.setId(id);
         Aula updatedAula = service.actualizarAula(id, aulaModificada);
         return ResponseEntity.ok(updatedAula);
     }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteAula(@PathVariable Long id) {
@@ -50,16 +53,15 @@ public class AulaController {
         return ResponseEntity.noContent().build();
     }
 
+    // Endpoints extra de filtrado se mantienen igual...
     @GetMapping("/{id}/reservas" )
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getReservasByAulaId(@PathVariable Long id) {
         var aulaOpt = service.getAulaById(id);
-        if (aulaOpt.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
+        if (aulaOpt.isEmpty()) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(aulaOpt.get().getReservas());
     }
-    // Ver aulas por capacidad: /aulas?capacidad=20
+
     @GetMapping(params = "capacidad")
     @PreAuthorize("isAuthenticated()")
     public List<Aula> getAulasByCapacidad(@RequestParam Integer capacidad) {
@@ -67,7 +69,7 @@ public class AulaController {
                 .filter(aula -> aula.getCapacidad() != null && aula.getCapacidad().equals(capacidad))
                 .toList();
     }
-    // Ver aulas con ordenadores: /aulas?ordenadores=true
+
     @GetMapping(params = "ordenadores")
     @PreAuthorize("isAuthenticated()")
     public List<Aula> getAulasConOrdenadores(@RequestParam Boolean ordenadores) {

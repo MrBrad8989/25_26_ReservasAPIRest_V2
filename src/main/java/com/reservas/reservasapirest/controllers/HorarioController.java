@@ -18,8 +18,7 @@ public class HorarioController {
     @GetMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<Horario>> getAllHorarios() {
-        List<Horario> horarios = service.getAllHorarios();
-        return ResponseEntity.ok(horarios);
+        return ResponseEntity.ok(service.getAllHorarios());
     }
 
     @GetMapping("/{id}")
@@ -35,6 +34,16 @@ public class HorarioController {
     public ResponseEntity<Horario> createHorario(@RequestBody Horario horario) {
         Horario nuevoHorario = service.createHorario(horario);
         return ResponseEntity.status(201).body(nuevoHorario);
+    }
+
+    // --- MÉTODO NUEVO ---
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Horario> actualizarHorario(@PathVariable Long id, @RequestBody Horario horario) {
+        // IMPORTANTE: Fijar el ID para evitar el error "Identifier altered from 1 to null"
+        horario.setId(id);
+        Horario actualizado = service.actualizarHorario(id, horario);
+        return ResponseEntity.ok(actualizado);
     }
 
     @DeleteMapping("/{id}")

@@ -51,11 +51,25 @@ public class ReservaService {
         if (ReservaExistenteOpt.isPresent()) {
             Reserva ReservaExistente = ReservaExistenteOpt.get();
 
+            // --- PROTECCIÓN DE DATOS ---
+            // 1. Guardamos el usuario original antes de copiar nada.
+            Usuario usuarioOriginal = ReservaExistente.getUsuario();
+            // 2. Guardamos también la fecha de creación original.
+            var fechaCreacionOriginal = ReservaExistente.getFechaCreacion();
+
             try {
+                // Esto copia los datos nuevos sobre la reserva existente.
+                // A veces, esta librería borra campos si vienen vacíos.
                 classUtil.copyProperties(ReservaExistente, ReservaModificada);
             } catch (Exception e) {
                 throw new RuntimeException("Error al actualizar la Reserva", e);
             }
+
+            // --- RESTAURACIÓN ---
+            // 3. Volvemos a poner el usuario original pase lo que pase.
+            ReservaExistente.setUsuario(usuarioOriginal);
+            // 4. Restauramos la fecha de creación.
+            ReservaExistente.setFechaCreacion(fechaCreacionOriginal);
 
             return repo.save(ReservaExistente);
         }
