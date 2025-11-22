@@ -1,16 +1,31 @@
 # ReservasAPIRest
 
-Proyecto REST API para gestionar reservas de aulas, creado con Spring Boot y Maven.
+Proyecto REST API para gestionar reservas de aulas, creado con Spring Boot y Maven, con interfaz web completa incluida.
+
+**Inicio rápido**
+
+```bash
+# Clonar el repositorio
+git clone <url-del-repo>
+cd 25_26_ReservasAPIRest_V2
+
+# Ejecutar la aplicación
+./mvnw spring-boot:run
+
+# Abrir en el navegador
+# http://localhost:8080/
+```
 
 **Descripción breve**
-- **Propósito:** API backend para crear, listar y gestionar aulas, horarios y reservas, con autenticación JWT.
-- **Stack:** Java 17, Spring Boot (Web, Data JPA, Security), Maven, H2/Postgres/MySQL, JJWT para tokens JWT.
+- **Propósito:** API backend para crear, listar y gestionar aulas, horarios y reservas, con autenticación JWT e interfaz web incluida.
+- **Stack:** Java 17, Spring Boot (Web, Data JPA, Security), Maven, H2/Postgres/MySQL, JJWT para tokens JWT, Frontend vanilla JavaScript.
 
 **Características**
 - **Autenticación:** Inicio de sesión y registro, protección de endpoints con JWT.
 - **Gestión de recursos:** CRUD para `Aula`, `Horario`, `Reserva` y `Usuario`.
 - **Persistencia flexible:** Soporta H2 (desarrollo), PostgreSQL y MySQL.
 - **Validaciones y manejo de errores:** Spring Validation y controlador global de excepciones.
+- **Interfaz web:** Frontend completo en vanilla JavaScript para gestionar todos los recursos sin necesidad de herramientas externas.
 
 **Tecnologías**
 - **Lenguaje:** Java 17 (`<java.version>17</java.version>` en `pom.xml`).
@@ -104,86 +119,76 @@ Si quieres, puedo:
 ---
 Archivo generado automáticamente: documentación base. Pídeme que lo personalice más si quieres.
 
-**Frontend incluido (estático)**
+**Frontend incluido (interfaz web completa)**
 
-- He añadido un frontend estático mínimo en `src/main/resources/static`:
-	- `index.html` — interfaz simple de autenticación y botones de acción.
-	- `app.js` — lógica JS para login y consulta a `GET /api/aulas` usando JWT.
-	- `styles.css` — estilos básicos.
+El proyecto ahora incluye un frontend web completo desarrollado en vanilla JavaScript, ubicado en `src/main/resources/static`. Esta interfaz permite gestionar todos los recursos de la API de forma visual sin necesidad de usar herramientas como Postman o curl.
 
-- Cómo usarlo:
+**Archivos del frontend:**
+- `index.html` — Interfaz HTML5 con formularios y navegación entre secciones
+- `app.js` — Lógica JavaScript para autenticación JWT y operaciones CRUD
+- `styles.css` — Estilos modernos con diseño responsivo y gradientes
 
-	1. Arranca la aplicación Spring Boot:
+**Funcionalidades disponibles:**
 
-	```bash
-	./mvnw spring-boot:run
-	```
+1. **Autenticación**
+   - Login con usuario y contraseña
+   - Almacenamiento seguro del token JWT en `localStorage`
+   - Modo demo para pruebas rápidas
+   - Cierre de sesión
 
-	2. Abre `http://localhost:8080/` en el navegador.
-	3. Inicia sesión con un usuario válido (`/api/auth/login`). Si la respuesta contiene el token, el frontend lo guardará en `localStorage`.
-	4. Haz clic en "Listar aulas" para consultar `GET /api/aulas` con el token en la cabecera `Authorization: Bearer <token>`.
+2. **Gestión de Aulas**
+   - Listar todas las aulas disponibles
+   - Crear nuevas aulas con capacidad y equipamiento
+   - Editar aulas existentes
+   - Eliminar aulas
+   - Campos: nombre, capacidad, ordenadores (sí/no), número de ordenadores
 
-- Notas:
-	- Este frontend es una base ligera para pruebas y demostraciones. Si prefieres un SPA con React/Vue/Angular, puedo generar el scaffold y conectar la build con `frontend-maven-plugin`.
+3. **Gestión de Horarios**
+   - Listar todos los horarios
+   - Crear nuevos horarios con día y sesión
+   - Eliminar horarios
+   - Campos: día de la semana, sesión diaria, hora inicio, hora fin
 
-**Frontend ampliado (novedades)**
+4. **Gestión de Reservas**
+   - Listar todas las reservas
+   - Crear nuevas reservas seleccionando aula y horario
+   - Eliminar reservas
+   - Campos: fecha, motivo, número de asistentes, aula, horario
 
-- He ampliado el frontend estático con vistas CRUD y mejoras visuales. Archivos añadidos/actualizados en `src/main/resources/static`:
-	- `index.html` — interfaz completa con navegación y formularios CRUD para Aulas, Horarios, Reservas y Usuarios.
-	- `app.js` — lógica JS para autenticación (login), gestión de token en `localStorage`, CRUD para recursos y navegación entre vistas. Incluye un botón "Modo demo" que almacena un token simulado (`DEMO`) para pruebas rápidas.
-	- `styles.css` — rediseño visual moderno y responsive.
-	- `package.json` — placeholder mínimo para que `frontend-maven-plugin` no falle (`npm install` / `npm run build`).
+5. **Gestión de Usuarios**
+   - Listar usuarios registrados
+   - Crear nuevos usuarios (registro)
+   - Eliminar usuarios
+   - Asignar roles (PROFESOR, ADMIN)
 
-**Cómo usar el frontend ampliado**
+**Cómo usar el frontend:**
 
-1. Asegúrate de tener JDK 17 y Maven (usa el wrapper incluido). Si tu entorno no tiene Java 17, instala/configura OpenJDK 17 antes de compilar.
+1. Arranca la aplicación Spring Boot:
 
-2. Arranca la aplicación (desde la raíz del proyecto):
+   ```bash
+   ./mvnw spring-boot:run
+   ```
 
-```bash
-chmod +x mvnw
-./mvnw spring-boot:run
-```
+2. Abre tu navegador en `http://localhost:8080/`
 
-3. Abre en el navegador:
+3. **Primera vez:** Inicia sesión con las credenciales por defecto (definidas en `DataLoader.java`) o usa el botón "Modo demo" para pruebas rápidas.
 
-```
-http://localhost:8080/
-```
+4. **Navegación:** Usa los botones en la barra de navegación para cambiar entre las diferentes secciones (Aulas, Horarios, Reservas, Usuarios).
 
-4. Prueba el frontend:
-	- Usa "Modo demo" para pruebas rápidas (almacena `DEMO` como token en `localStorage`). Algunas llamadas protegidas pueden requerir un token válido emitido por `/api/auth/login`.
-	- Navega entre las pestañas: `Aulas`, `Horarios`, `Reservas`, `Usuarios`.
-	- Crea/edita/borra recursos (nota: para crear/editar/borrar aulas y horarios puede ser necesario un usuario con rol `ADMIN`).
+5. **Operaciones:** Cada sección permite crear, listar y eliminar recursos. Los formularios se validan automáticamente.
 
-**Notas y soluciones a problemas comunes**
+6. **Token JWT:** El token se gestiona automáticamente. Todas las peticiones a la API incluyen el header `Authorization: Bearer <token>`.
 
-- Si al ejecutar `./mvnw spring-boot:run` ves errores relacionados con `npm` (frontend-maven-plugin), ya se añadió un `package.json` mínimo en `src/main/resources/static` para evitar fallos de `npm install`.
-- Si aparece el error `Fatal error compiling: error: release version 17 not supported`, asegúrate de ejecutar Maven con JDK 17. Comprueba con:
+**Características técnicas:**
+- Interfaz 100% vanilla JavaScript (sin frameworks)
+- Diseño responsivo que se adapta a móviles y tablets
+- Manejo de errores con mensajes informativos
+- Validación de formularios en cliente
+- Actualización automática de listas después de cada operación
+- Sistema de navegación por pestañas
+- Estilos modernos con variables CSS y gradientes
 
-```bash
-java -version
-javac -version
-mvn -v
-```
-
-- Si ves problemas de codificación al filtrar recursos (ej.: `MalformedInputException`), se añadió en `pom.xml`:
-
-```xml
-<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-```
-
-**Archivos clave añadidos**
-
-- `src/main/resources/static/index.html` — nueva UI con navegación y formularios.
-- `src/main/resources/static/app.js` — lógica de frontend (login, CRUD, navegación, demo mode).
-- `src/main/resources/static/styles.css` — estilos mejorados.
-- `src/main/resources/static/package.json` — placeholder para npm.
-
----
-Si quieres, puedo ahora:
-- Añadir iconos y mensajes de éxito/fracaso en la UI.
-- Integrar una librería CSS (Tailwind/Bootstrap) o transformar esto en SPA con React + Vite y configurar `frontend-maven-plugin` para compilar la build.
-
+**Notas:**
+- Este frontend está optimizado para desarrollo y pruebas. Para producción, considera añadir validaciones adicionales y manejo de errores más robusto.
+- Si prefieres migrar a un framework moderno (React, Vue, Angular), la estructura actual facilita la integración con `frontend-maven-plugin`.
 
