@@ -1,183 +1,414 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Reservas - Frontend</title>
-  <link rel="stylesheet" href="/styles.css">
+    <meta charset="UTF-8">
+    <title>Gestión del Instituto</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        body { background-color: #f8f9fa; }
+        .login-container { max-width: 400px; margin: 80px auto; padding: 30px; background: white; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .nav-link { cursor: pointer; }
+        .nav-link.active { background-color: #0d6efd !important; color: white !important; }
+        /* Transiciones suaves */
+        .fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
+        .fade-enter-from, .fade-leave-to { opacity: 0; }
+    </style>
 </head>
 <body>
-  <header>
-    <div class="container">
-      <h1>Reservas</h1>
-      <p>Interfaz de prueba para la API — autentícate y gestiona aulas, horarios y reservas.</p>
+
+<div id="app" class="container-fluid p-0">
+
+    <div v-if="!token" class="container">
+        <div class="login-container">
+            <h3 class="text-center mb-4 text-primary"><i class="fas fa-school me-2"></i>Intranet</h3>
+            <div v-if="errorMsg" class="alert alert-danger">{{ errorMsg }}</div>
+            <form @submit.prevent="login">
+                <div class="mb-3">
+                    <label>Email</label>
+                    <input type="email" v-model="loginForm.email" class="form-control" placeholder="admin@instituto.com" required>
+                </div>
+                <div class="mb-3">
+                    <label>Contraseña</label>
+                    <input type="password" v-model="loginForm.password" class="form-control" placeholder="admin" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Entrar</button>
+            </form>
+            <div class="mt-3 text-muted small text-center">
+                Admin: admin@instituto.com / admin
+            </div>
+        </div>
     </div>
-  </header>
 
-  <main>
-    <section id="auth" class="view" style="margin-bottom:16px">
-      <h2>Autenticación</h2>
-      <form id="loginForm">
-        <label>Usuario
-          <input type="text" id="username" required placeholder="Email o usuario">
-        </label>
-        <label>Contraseña
-          <input type="password" id="password" required placeholder="Contraseña">
-        </label>
-        <div style="display:flex;gap:8px;margin-top:6px">
-          <button type="submit" class="btn primary">Iniciar sesión</button>
-          <button type="button" id="btnGuest" class="btn ghost">Modo demo</button>
+    <div v-else>
+        <nav class="navbar navbar-dark bg-dark px-4 shadow">
+            <span class="navbar-brand mb-0 h1"><i class="fas fa-graduation-cap me-2"></i>Gestión Reservas</span>
+            <div class="d-flex align-items-center text-white">
+                <span class="me-3 d-none d-md-inline">Hola, {{ perfilData.nombre }}</span>
+                <button @click="mostrarPerfil = !mostrarPerfil" class="btn btn-outline-info btn-sm me-2">
+                    <i class="fas fa-user"></i> Mi Perfil
+                </button>
+                <button @click="logout" class="btn btn-danger btn-sm">
+                    <i class="fas fa-sign-out-alt"></i> Salir
+                </button>
+            </div>
+        </nav>
+
+        <div v-if="mostrarPerfil" class="container mt-3">
+            <div class="alert alert-info alert-dismissible fade show shadow-sm" role="alert">
+                <h5 class="alert-heading"><i class="fas fa-id-badge me-2"></i>Datos del Usuario</h5>
+                <hr>
+                <div class="row">
+                    <div class="col-md-4"><strong>Nombre:</strong> {{ perfilData.nombre }}</div>
+                    <div class="col-md-4"><strong>Email:</strong> {{ perfilData.email }}</div>
+                    <div class="col-md-2"><strong>Rol:</strong> <span class="badge bg-dark">{{ perfilData.role }}</span></div>
+                    <div class="col-md-2"><strong>ID:</strong> {{ perfilData.id }}</div>
+                </div>
+                <button type="button" class="btn-close" @click="mostrarPerfil = false"></button>
+            </div>
         </div>
-      </form>
-      <div id="authInfo" class="info"></div>
-    </section>
 
-    <nav class="main-nav" aria-label="Navegación principal">
-      <button data-view="aulas" class="nav-btn active">Aulas</button>
-      <button data-view="horarios" class="nav-btn">Horarios</button>
-      <button data-view="reservas" class="nav-btn">Reservas</button>
-      <button data-view="usuarios" class="nav-btn">Usuarios</button>
-      <button id="btnClearToken" class="nav-btn">Cerrar sesión</button>
-    </nav>
-
-    <section id="views">
-      <section id="aulasView" class="view">
-        <h2>Aulas</h2>
-        <div class="view-grid">
-          <div>
-            <h3>Crear / Editar aula</h3>
-            <form id="aulaForm">
-              <input type="hidden" id="aulaId" />
-              <label>Nombre
-                <input id="aulaNombre" required placeholder="Ej: Aula A101">
-              </label>
-              <label>Capacidad
-                <input id="aulaCapacidad" type="number" placeholder="Ej: 30">
-              </label>
-              <label>¿Tiene ordenadores?
-                <input id="aulaOrdenadores" type="checkbox">
-              </label>
-              <label>Nº ordenadores
-                <input id="aulaNumeroOrdenadores" type="number" placeholder="Ej: 20">
-              </label>
-              <div style="display:flex;gap:8px">
-                <button type="submit" class="btn primary">Guardar</button>
-                <button type="button" id="aulaReset" class="btn ghost">Limpiar</button>
-              </div>
-            </form>
-          </div>
-          <div>
-            <h3>Listado</h3>
-            <div id="aulasList" class="result"></div>
-          </div>
+        <div class="bg-white shadow-sm mb-4">
+            <div class="container">
+                <ul class="nav nav-pills py-3">
+                    <li class="nav-item">
+                        <a class="nav-link" :class="{active: seccion === 'reservas'}" @click="seccion = 'reservas'">📅 Reservas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" :class="{active: seccion === 'aulas'}" @click="seccion = 'aulas'">🏫 Aulas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" :class="{active: seccion === 'horarios'}" @click="seccion = 'horarios'">⏰ Horarios</a>
+                    </li>
+                </ul>
+            </div>
         </div>
-      </section>
 
-      <section id="horariosView" class="view" style="display:none">
-        <h2>Horarios</h2>
-        <div class="view-grid">
-          <div>
-            <h3>Crear horario</h3>
-            <form id="horarioForm">
-              <input type="hidden" id="horarioId" />
-              <label>Día de la semana
-                <input id="horarioDia" placeholder="Ej: Lunes">
-              </label>
-              <label>Sesión diaria
-                <input id="horarioSesion" type="number" placeholder="Ej: 1">
-              </label>
-              <label>Hora inicio
-                <input id="horarioInicio" type="time">
-              </label>
-              <label>Hora fin
-                <input id="horarioFin" type="time">
-              </label>
-              <div style="display:flex;gap:8px">
-                <button type="submit" class="btn primary">Guardar</button>
-                <button type="button" id="horarioReset" class="btn ghost">Limpiar</button>
-              </div>
-            </form>
-          </div>
-          <div>
-            <h3>Listado</h3>
-            <div id="horariosList" class="result"></div>
-          </div>
+        <div class="container">
+
+            <div v-if="seccion === 'reservas'" class="row">
+                <div class="col-md-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-primary text-white">{{ modoEdicion ? 'Editar Reserva' : 'Nueva Reserva' }}</div>
+                        <div class="card-body">
+                            <form @submit.prevent="guardarReserva">
+                                <div class="mb-2">
+                                    <label>Fecha</label>
+                                    <input type="date" v-model="reservaForm.fecha" class="form-control" required>
+                                </div>
+                                <div class="mb-2">
+                                    <label>Aula</label>
+                                    <select v-model="reservaForm.aulaId" class="form-select" required>
+                                        <option v-for="a in aulas" :value="a.id">{{ a.nombre }} (Cap: {{a.capacidad}})</option>
+                                    </select>
+                                </div>
+                                <div class="mb-2">
+                                    <label>Horario</label>
+                                    <select v-model="reservaForm.horarioId" class="form-select" required>
+                                        <option v-for="h in horarios" :value="h.id">{{ h.diaSemana }} - Sesión {{ h.sesionDiaria }}</option>
+                                    </select>
+                                </div>
+                                <div class="mb-2">
+                                    <label>Motivo</label>
+                                    <input type="text" v-model="reservaForm.motivo" class="form-control" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label>Asistentes</label>
+                                    <input type="number" v-model="reservaForm.numeroAsistentes" class="form-control" required>
+                                </div>
+                                <button class="btn w-100" :class="modoEdicion ? 'btn-warning' : 'btn-success'">
+                                    {{ modoEdicion ? 'Guardar Cambios' : 'Reservar' }}
+                                </button>
+                                <button v-if="modoEdicion" type="button" @click="cancelarEdicion" class="btn btn-secondary w-100 mt-2">Cancelar</button>
+                            </form>
+                            <div v-if="msg" class="alert mt-3 py-1" :class="success ? 'alert-success' : 'alert-danger'">{{ msg }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="card shadow-sm">
+                        <div class="card-header d-flex justify-content-between">
+                            <span>Mis Reservas</span>
+                            <button @click="cargarReservas" class="btn btn-sm btn-light">🔄</button>
+                        </div>
+                        <table class="table table-hover mb-0">
+                            <thead><tr><th>Fecha</th><th>Aula</th><th>Motivo</th><th>Acciones</th></tr></thead>
+                            <tbody>
+                            <tr v-for="r in misReservas" :key="r.id">
+                                <td>{{ r.fecha }}</td>
+                                <td>{{ r.aula ? r.aula.nombre : '-' }}</td>
+                                <td>{{ r.motivo }}</td>
+                                <td>
+                                    <button @click="editarReserva(r)" class="btn btn-sm btn-warning me-1"><i class="fas fa-pen"></i></button>
+                                    <button @click="borrar('reservas', r.id)" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="seccion === 'aulas'" class="row">
+                <div class="col-12 mb-3">
+                    <div class="alert alert-warning" v-if="perfilData.role !== 'ROLE_ADMIN'"><i class="fas fa-exclamation-triangle"></i> Solo los administradores pueden crear/editar aulas.</div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card shadow-sm border-info">
+                        <div class="card-header bg-info text-white">Gestión de Aula</div>
+                        <div class="card-body">
+                            <form @submit.prevent="guardarAula">
+                                <div class="mb-2">
+                                    <label>Nombre</label>
+                                    <input type="text" v-model="aulaForm.nombre" class="form-control" required>
+                                </div>
+                                <div class="mb-2">
+                                    <label>Capacidad</label>
+                                    <input type="number" v-model="aulaForm.capacidad" class="form-control" required>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" v-model="aulaForm.esAulaOrdenadores">
+                                    <label class="form-check-label">¿Tiene Ordenadores?</label>
+                                </div>
+                                <div class="mb-3" v-if="aulaForm.esAulaOrdenadores">
+                                    <label>Num. Ordenadores</label>
+                                    <input type="number" v-model="aulaForm.numeroOrdenadores" class="form-control">
+                                </div>
+                                <button class="btn btn-info text-white w-100">Guardar Aula</button>
+                                <button v-if="aulaForm.id" type="button" @click="resetAulaForm" class="btn btn-secondary w-100 mt-2">Cancelar</button>
+                            </form>
+                            <div v-if="aulaMsg" class="alert mt-2 py-1" :class="aulaSuccess ? 'alert-success' : 'alert-danger'">{{ aulaMsg }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="card shadow-sm">
+                        <table class="table table-striped mb-0">
+                            <thead><tr><th>ID</th><th>Nombre</th><th>Cap.</th><th>PCs</th><th>Acciones</th></tr></thead>
+                            <tbody>
+                            <tr v-for="a in aulas" :key="a.id">
+                                <td>{{ a.id }}</td>
+                                <td>{{ a.nombre }}</td>
+                                <td>{{ a.capacidad }}</td>
+                                <td>{{ a.esAulaOrdenadores ? '✅ ('+a.numeroOrdenadores+')' : '❌' }}</td>
+                                <td>
+                                    <button @click="editarAula(a)" class="btn btn-sm btn-warning me-1"><i class="fas fa-pen"></i></button>
+                                    <button @click="borrar('aulas', a.id)" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="seccion === 'horarios'" class="row">
+                <div class="col-12 mb-3">
+                    <div class="alert alert-warning" v-if="perfilData.role !== 'ROLE_ADMIN'"><i class="fas fa-exclamation-triangle"></i> Solo los administradores pueden gestionar horarios.</div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card shadow-sm border-success">
+                        <div class="card-header bg-success text-white">Gestión de Horario</div>
+                        <div class="card-body">
+                            <form @submit.prevent="guardarHorario">
+                                <div class="mb-2">
+                                    <label>Día Semana</label>
+                                    <select v-model="horarioForm.diaSemana" class="form-select">
+                                        <option>LUNES</option><option>MARTES</option><option>MIERCOLES</option><option>JUEVES</option><option>VIERNES</option>
+                                    </select>
+                                </div>
+                                <div class="mb-2">
+                                    <label>Sesión (1-7)</label>
+                                    <input type="number" v-model="horarioForm.sesionDiaria" class="form-control" required>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6 mb-3">
+                                        <label>Inicio</label>
+                                        <input type="time" v-model="horarioForm.horaInicio" class="form-control" required step="1">
+                                    </div>
+                                    <div class="col-6 mb-3">
+                                        <label>Fin</label>
+                                        <input type="time" v-model="horarioForm.horaFin" class="form-control" required step="1">
+                                    </div>
+                                </div>
+                                <button class="btn btn-success w-100">Guardar Horario</button>
+                                <button v-if="horarioForm.id" type="button" @click="resetHorarioForm" class="btn btn-secondary w-100 mt-2">Cancelar</button>
+                            </form>
+                            <div v-if="horarioMsg" class="alert mt-2 py-1" :class="horarioSuccess ? 'alert-success' : 'alert-danger'">{{ horarioMsg }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="card shadow-sm">
+                        <table class="table table-striped mb-0">
+                            <thead><tr><th>Día</th><th>Sesión</th><th>Horas</th><th>Acciones</th></tr></thead>
+                            <tbody>
+                            <tr v-for="h in horarios" :key="h.id">
+                                <td>{{ h.diaSemana }}</td>
+                                <td>{{ h.sesionDiaria }}</td>
+                                <td>{{ h.horaInicio }} - {{ h.horaFin }}</td>
+                                <td>
+                                    <button @click="editarHorario(h)" class="btn btn-sm btn-warning me-1"><i class="fas fa-pen"></i></button>
+                                    <button @click="borrar('horarios', h.id)" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
         </div>
-      </section>
+    </div>
+</div>
 
-      <section id="reservasView" class="view" style="display:none">
-        <h2>Reservas</h2>
-        <div class="view-grid">
-          <div>
-            <h3>Crear reserva</h3>
-            <form id="reservaForm">
-              <label>Fecha
-                <input id="reservaFecha" type="date" required>
-              </label>
-              <label>Motivo
-                <input id="reservaMotivo">
-              </label>
-              <label>Nº asistentes
-                <input id="reservaAsistentes" type="number">
-              </label>
-              <label>Aula
-                <select id="reservaAula"></select>
-              </label>
-              <label>Horario
-                <select id="reservaHorario"></select>
-              </label>
-              <div style="display:flex;gap:8px">
-                <button type="submit" class="btn primary">Reservar</button>
-                <button type="button" id="reservaReset" class="btn ghost">Limpiar</button>
-              </div>
-            </form>
-          </div>
-          <div>
-            <h3>Listado</h3>
-            <div id="reservasList" class="result"></div>
-          </div>
-        </div>
-      </section>
+<script>
+    const { createApp } = Vue;
 
-      <section id="usuariosView" class="view" style="display:none">
-        <h2>Usuarios</h2>
-        <div class="view-grid">
-          <div>
-            <h3>Crear usuario</h3>
-            <form id="usuarioForm">
-              <input type="hidden" id="usuarioId" />
-              <label>Nombre
-                <input id="usuarioNombre" placeholder="Ej: Juan Pérez">
-              </label>
-              <label>Email
-                <input id="usuarioEmail" type="email" placeholder="ejemplo@dominio.com">
-              </label>
-              <label>Contraseña
-                <input id="usuarioPassword" type="password" placeholder="Mínimo 6 caracteres">
-              </label>
-              <label>Role
-                <select id="usuarioRole">
-                  <option value="ROLE_PROFESOR">PROFESOR</option>
-                  <option value="ROLE_ADMIN">ADMIN</option>
-                </select>
-              </label>
-              <div style="display:flex;gap:8px">
-                <button type="submit" class="btn primary">Guardar</button>
-                <button type="button" id="usuarioReset" class="btn ghost">Limpiar</button>
-              </div>
-            </form>
-          </div>
-          <div>
-            <h3>Listado</h3>
-            <div id="usuariosList" class="result"></div>
-          </div>
-        </div>
-      </section>
-    </section>
+    createApp({
+        data() {
+            return {
+                token: localStorage.getItem('jwt_token') || null,
+                seccion: 'reservas',
+                loginForm: { email: '', password: '' },
+                perfilData: {},
 
-  </main>
+                // VARIABLES QUE FALTABAN:
+                mostrarPerfil: false, // Controla la visibilidad de la ventana de perfil
 
-  <script src="/app.js"></script>
-  <div class="footer">Proyecto de ejemplo — interfaz de pruebas para la API.</div>
+                // Datos Maestros
+                aulas: [],
+                horarios: [],
+                misReservas: [],
+
+                // Forms
+                reservaForm: { id: null, fecha: '', motivo: '', numeroAsistentes: 10, aulaId: null, horarioId: null },
+                aulaForm: { id: null, nombre: '', capacidad: 30, esAulaOrdenadores: false, numeroOrdenadores: 0 },
+                horarioForm: { id: null, diaSemana: 'LUNES', sesionDiaria: 1, horaInicio: '08:00:00', horaFin: '09:00:00' },
+
+                modoEdicion: false,
+                errorMsg: '', msg: '', success: false,
+                aulaMsg: '', aulaSuccess: false,
+                horarioMsg: '', horarioSuccess: false
+            }
+        },
+        mounted() {
+            if (this.token) {
+                this.configurarAxios();
+                this.cargarDatosGlobales();
+            }
+        },
+        methods: {
+            configurarAxios() { axios.defaults.headers.common['Authorization'] = 'Bearer ' + this.token; },
+
+            async login() {
+                try {
+                    const res = await axios.post('/api/auth/login', this.loginForm);
+                    this.token = res.data.token;
+                    localStorage.setItem('jwt_token', this.token);
+                    this.configurarAxios();
+                    this.cargarDatosGlobales();
+                } catch (e) { this.errorMsg = "Credenciales inválidas"; }
+            },
+            logout() {
+                this.token = null; localStorage.removeItem('jwt_token');
+                this.perfilData = {};
+                this.mostrarPerfil = false; // Cerrar ventana al salir
+            },
+
+            async cargarDatosGlobales() {
+                try {
+                    const [p, a, h] = await Promise.all([
+                        axios.get('/api/usuario/perfil'),
+                        axios.get('/api/aulas'),
+                        axios.get('/api/horarios')
+                    ]);
+                    this.perfilData = p.data;
+                    this.aulas = a.data;
+                    this.horarios = h.data;
+                    this.cargarReservas();
+
+                    if(this.aulas.length) this.reservaForm.aulaId = this.aulas[0].id;
+                    if(this.horarios.length) this.reservaForm.horarioId = this.horarios[0].id;
+                } catch (e) { if(e.response?.status === 403) this.logout(); }
+            },
+
+            // --- GESTION RESERVAS ---
+            async cargarReservas() {
+                const res = await axios.get('/api/reservas/mis-reservas');
+                this.misReservas = res.data;
+            },
+            async guardarReserva() {
+                this.msg = "Guardando...";
+                try {
+                    const data = { ...this.reservaForm, numeroAsistentes: Number(this.reservaForm.numeroAsistentes) };
+                    if (this.modoEdicion) await axios.put(`/api/reservas/${this.reservaForm.id}`, data);
+                    else await axios.post('/api/reservas', data);
+
+                    this.success = true; this.msg = "Guardado OK";
+                    this.cargarReservas(); this.cancelarEdicion();
+                } catch (e) { this.success = false; this.msg = e.response?.data?.message || "Error"; }
+            },
+            editarReserva(r) {
+                this.modoEdicion = true;
+                this.reservaForm = {
+                    id: r.id, fecha: r.fecha, motivo: r.motivo, numeroAsistentes: r.numeroAsistentes,
+                    aulaId: r.aula?.id || this.aulas[0].id, horarioId: r.horario?.id || this.horarios[0].id
+                };
+            },
+            cancelarEdicion() {
+                this.modoEdicion = false; this.msg = '';
+                this.reservaForm = { id: null, fecha: '', motivo: '', numeroAsistentes: 10, aulaId: this.aulas[0]?.id, horarioId: this.horarios[0]?.id };
+            },
+
+            // --- GESTION AULAS ---
+            async guardarAula() {
+                this.aulaMsg = "Procesando...";
+                try {
+                    if (this.aulaForm.id) await axios.put(`/api/aulas/${this.aulaForm.id}`, this.aulaForm);
+                    else await axios.post('/api/aulas', this.aulaForm);
+
+                    this.aulaSuccess = true; this.aulaMsg = "Aula guardada";
+                    const res = await axios.get('/api/aulas'); this.aulas = res.data;
+                    this.resetAulaForm();
+                } catch (e) { this.aulaSuccess = false; this.aulaMsg = "Error (¿Eres Admin?)"; }
+            },
+            editarAula(a) { this.aulaForm = { ...a }; },
+            resetAulaForm() { this.aulaForm = { id: null, nombre: '', capacidad: 30, esAulaOrdenadores: false, numeroOrdenadores: 0 }; this.aulaMsg = ''; },
+
+            // --- GESTION HORARIOS ---
+            async guardarHorario() {
+                this.horarioMsg = "Procesando...";
+                try {
+                    const fmtTime = (t) => t.length === 5 ? t + ":00" : t;
+                    const data = { ...this.horarioForm, horaInicio: fmtTime(this.horarioForm.horaInicio), horaFin: fmtTime(this.horarioForm.horaFin) };
+
+                    if (this.horarioForm.id) await axios.put(`/api/horarios/${this.horarioForm.id}`, data);
+                    else await axios.post('/api/horarios', data);
+
+                    this.horarioSuccess = true; this.horarioMsg = "Horario guardado";
+                    const res = await axios.get('/api/horarios'); this.horarios = res.data;
+                    this.resetHorarioForm();
+                } catch (e) { this.horarioSuccess = false; this.horarioMsg = "Error (¿Eres Admin?)"; }
+            },
+            editarHorario(h) { this.horarioForm = { ...h }; },
+            resetHorarioForm() { this.horarioForm = { id: null, diaSemana: 'LUNES', sesionDiaria: 1, horaInicio: '08:00:00', horaFin: '09:00:00' }; this.horarioMsg = ''; },
+
+            // --- BORRAR ---
+            async borrar(endpoint, id) {
+                if(!confirm("¿Seguro?")) return;
+                try {
+                    await axios.delete(`/api/${endpoint}/${id}`);
+                    if(endpoint === 'reservas') this.cargarReservas();
+                    else if(endpoint === 'aulas') { const res = await axios.get('/api/aulas'); this.aulas = res.data; }
+                    else if(endpoint === 'horarios') { const res = await axios.get('/api/horarios'); this.horarios = res.data; }
+                } catch(e) { alert("Error borrando (¿Permisos o datos en uso?)"); }
+            }
+        }
+    }).mount('#app');
+</script>
 </body>
 </html>
